@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestión de Alumnos - Supabase</title>
+
+  <!-- Bootstrap CSS -->
+  <link 
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" 
+    rel="stylesheet"
+  />
+
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    footer {
+      margin-top: 40px;
+      padding: 20px;
+      background-color: #212529;
+      color: white;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <!-- =========================================
+       NAVBAR
+       ========================================= -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">📚 Gestión de Alumnos</a>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarNav"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link active" href="#alumnos">Alumnos</a></li>
+          <li class="nav-item"><a class="nav-link" href="#video">Video</a></li>
+          <li class="nav-item"><a class="nav-link" href="#iframe">Iframe</a></li>
+          <li class="nav-item"><a class="nav-link" href="#imagenes">Imágenes</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- =========================================
+       SECCIÓN PRINCIPAL
+       ========================================= -->
+  <div class="container mt-5">
+    <h1 class="text-center mb-4">Listado de Alumnos desde Supabase</h1>
+    <p id="status" class="text-center text-muted">Conectando a la base de datos...</p>
+
+    <!-- Contenedor de resultados -->
+    <div id="alumnos-list" class="row"></div>
+  </div>
+
+  <!-- =========================================
+       SECCIÓN DE VIDEO
+       ========================================= -->
+  <section id="video" class="container mt-5">
+    <h2 class="mb-3">Video Informativo</h2>
+    <div class="ratio ratio-16x9">
+      <video controls poster="https://via.placeholder.com/800x450.png?text=Video+de+Ejemplo">
+        <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+        Tu navegador no soporta la reproducción de video.
+      </video>
+    </div>
+  </section>
+
+  <!-- =========================================
+       SECCIÓN DE IFRAME
+       ========================================= -->
+  <section id="iframe" class="container mt-5">
+    <h2 class="mb-3">Contenido Externo (Iframe)</h2>
+    <div class="ratio ratio-16x9">
+      <iframe 
+        src="https://supabase.com" 
+        title="Sitio Supabase" 
+        allowfullscreen>
+      </iframe>
+    </div>
+  </section>
+
+  <!-- =========================================
+       SECCIÓN DE IMÁGENES
+       ========================================= -->
+  <section id="imagenes" class="container mt-5 mb-5">
+    <h2 class="mb-3">Galería de Imágenes</h2>
+    <div class="row g-3">
+      <div class="col-md-4">
+        <img src="https://via.placeholder.com/400x250.png?text=Alumno+1" class="img-fluid rounded shadow-sm" alt="Alumno 1">
+      </div>
+      <div class="col-md-4">
+        <img src="https://via.placeholder.com/400x250.png?text=Alumno+2" class="img-fluid rounded shadow-sm" alt="Alumno 2">
+      </div>
+      <div class="col-md-4">
+        <img src="https://via.placeholder.com/400x250.png?text=Alumno+3" class="img-fluid rounded shadow-sm" alt="Alumno 3">
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================
+       PIE DE PÁGINA
+       ========================================= -->
+  <footer>
+    <p>© 2025 - Proyecto de Práctica Profesional III - Supabase + Bootstrap</p>
+  </footer>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    // =========================================
+    // Conexión con Supabase
+    // =========================================
+    const SUPABASE_URL = "https://wmxnqxrjzbvkxctvhise.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndteG5xeHJqemJ2a3hjdHZoaXNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5ODY1NDEsImV4cCI6MjA3NjU2MjU0MX0.GAulWlNfBFQsVo04_PIYgiHZQYsMc6t8ybLQ5z02z68";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // =========================================
+    // Función: Cargar Alumnos
+    // =========================================
+    async function cargarAlumnos() {
+      const statusEl = document.getElementById('status');
+      const contenedor = document.getElementById('alumnos-list');
+
+      try {
+        const { data, error } = await supabase
+          .from('alumnos')
+          .select('*');
+
+        if (error) throw error;
+
+        statusEl.textContent = "✅ Datos cargados correctamente.";
+
+        if (!data || data.length === 0) {
+          contenedor.innerHTML = "<p class='text-center'>No hay registros en la tabla.</p>";
+          return;
+        }
+
+        data.forEach(alumno => {
+          const col = document.createElement('div');
+          col.classList.add('col-md-4', 'mb-4');
+
+          col.innerHTML = `
+            <div class="card shadow-sm h-100">
+              <div class="card-body">
+                <h5 class="card-title">${alumno.nombre || 'Sin nombre'} ${alumno.apellido || ''}</h5>
+                <p class="card-text"><strong>DNI:</strong> ${alumno.dni}</p>
+                <p class="card-text"><strong>Edad:</strong> ${alumno.edad !== null ? alumno.edad : 'Sin dato'}</p>
+                <p class="card-text"><strong>Activo:</strong> ${alumno.activo ? '✅ Sí' : '❌ No'}</p>
+              </div>
+            </div>
+          `;
+          contenedor.appendChild(col);
+        });
+
+      } catch (err) {
+        console.error("Error al conectar o consultar Supabase:", err.message);
+        statusEl.textContent = "❌ Error al obtener los datos. Ver consola para más detalles.";
+      }
+    }
+
+    cargarAlumnos();
+  </script>
+</body>
+</html>
+
+
+
